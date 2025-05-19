@@ -50,7 +50,7 @@ def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
         csv_reader = csv.reader(csv_file, delimiter=",")
         next(csv_reader, None)  # Skip headers
         for x, y, *zt in csv_reader:
-            water_sources.append(WaterSource(Vector(float(x), float(y)), volume=float(zt[0])))
+            water_sources.append(WaterSource(Vector(float(x) * 100, float(y) * 100), volume=float(zt[0]) * 100))
 
     return water_sources
 
