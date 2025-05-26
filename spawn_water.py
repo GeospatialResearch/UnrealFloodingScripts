@@ -16,7 +16,7 @@ def spawn_water_sources(water_sources: List[WaterSource]):
     blueprint_class = EAL.load_blueprint_class(asset_path=WaterSource.blueprint_class_path)
     component_class = EAL.load_blueprint_class(asset_path="/Game/FluidFlux/Simulation/Modifiers/Components/BP_FluxModifierSourceComponent.BP_FluxModifierSourceComponent")
     for water_source in water_sources:
-        location = water_source.location.to_unreal()
+        location = vector_to_unreal(water_source.location)
         rotation = (location - location).rotator()
         source_actor = ELL.spawn_actor_from_class(actor_class=blueprint_class,
                                            location=location,
@@ -40,7 +40,7 @@ def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
 
 
 def main():
-    file_path = pathlib.Path(__file__).parent / "testing.csv"
+    file_path = pathlib.Path(__file__).parent / "output.csv"
     water_sources = read_water_sources_csv(file_path)
     spawn_water_sources(water_sources)
 
