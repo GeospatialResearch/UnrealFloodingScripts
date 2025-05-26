@@ -10,6 +10,8 @@ from models import WaterSource
 
 GAUGE_POINTS_PATH = Path(r"D:\unreal\taumutu\Data\Vector\read_points_1.geojson")
 FLOOD_MODEL_OUTPUT_PATH = Path(r"D:\unreal\taumutu\Data\taumutu_100_year.nc")
+WATER_SOURCES_OUTPUT_PATH = Path(r"output.csv")
+LOCK_TO_GRID = False
 
 
 def get_gauge_points() -> gpd.GeoDataFrame:
@@ -17,11 +19,20 @@ def get_gauge_points() -> gpd.GeoDataFrame:
 
 
 def convert_depths_to_water_sources(gauge_depths: gpd.GeoDataFrame) -> List[WaterSource]:
-    pass
+    print(gauge_depths)
 
 
 def export_to_csv(gauge_depths: gpd.GeoDataFrame, out_file_path: Path) -> None:
-    pass
+    gauge_depths["x"] = gauge_depths.geometry.x
+    gauge_depths["y"] = gauge_depths.geometry.y
+    # Reorder x and y columns to beginning
+    columns = list(gauge_depths)
+    columns.insert(0, columns.pop(columns.index("y")))
+    columns.insert(0, columns.pop(columns.index("x")))
+    gauge_depths = gauge_depths.loc[:, columns]
+
+    gauge_depths = gauge_depths.drop(["geometry"], axis=1)
+    gauge_depths.to_csv(out_file_path, index=False)
 
 
 def extract_depths_for_single_point(row: gpd.GeoSeries, depth_array: xr.DataArray) -> gpd.GeoSeries:
@@ -50,6 +61,7 @@ def main():
         depth_array = ds["h_P0"]
         gauge_depths = extract_depths_for_points(gauge_points, depth_array)
     water_sources = convert_depths_to_water_sources(gauge_depths)
+    export_to_csv(gauge_depths, WATER_SOURCES_OUTPUT_PATH)
     print(water_sources)
 
 
