@@ -1,29 +1,13 @@
 import csv
-from dataclasses import dataclass
 import os
 import pathlib
-from typing import ClassVar, List, NamedTuple
 
 import unreal
 
+from models import Vector, WaterSource
 
-class Vector(NamedTuple):
-    x: float
-    y: float
-    z: float = 0
-
-    def to_unreal(self) -> unreal.Vector:
-        return unreal.Vector(self.x, self.y, self.z)
-
-
-@dataclass(frozen=True)
-class WaterSource:
-    blueprint_class_path: ClassVar[
-        str] = "/Game/FluidFlux/Simulation/Modifiers/BP_FluxModifierSourceActor.BP_FluxModifierSourceActor"
-    location: Vector = Vector(0, 0, 0)
-    volume: float = 1
-    intensity: float = 1
-    direction: Vector = Vector(0, 0)
+def vector_to_unreal(vector: Vector) -> unreal.Vector:
+    return unreal.Vector(vector.x, vector.y, vector.z)
 
 
 def spawn_water_sources(water_sources: List[WaterSource]):
