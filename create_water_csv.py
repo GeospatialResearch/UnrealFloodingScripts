@@ -4,6 +4,7 @@ from typing import Dict, List
 import geopandas as gpd
 import pandas as pd
 import rioxarray as rxr
+from shapely.geometry import Point
 import xarray as xr
 
 from models import Vector, WaterSource
@@ -11,7 +12,7 @@ from models import Vector, WaterSource
 GAUGE_POINTS_PATH = Path(r"D:\unreal\taumutu\Data\Vector\read_points_1.geojson")
 FLOOD_MODEL_OUTPUT_PATH = Path(r"D:\unreal\taumutu\Data\taumutu_100_year.nc")
 WATER_SOURCES_OUTPUT_PATH = Path(r"output.csv")
-LOCK_TO_GRID = False
+LOCK_TO_GRID = True
 
 
 def get_gauge_points() -> gpd.GeoDataFrame:
@@ -46,7 +47,11 @@ def extract_depths_for_single_point(row: gpd.GeoSeries, depth_array: xr.DataArra
     depths_for_times = {}
     for time_slice in times:
         depths_for_times[str(time_slice)] = point_depth_array.sel(time=time_slice).values.item(0)
-
+    if LOCK_TO_GRID:
+        # Modify point to be centred on raster cell
+        x = point_depth_array.xx_P0.values.item(0)
+        y = point_depth_array.yy_P0.values.item(0)
+        depths_for_times["geometry"] = Point(x, y)
     row.update(depths_for_times)
     return row
 
