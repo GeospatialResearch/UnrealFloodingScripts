@@ -6,7 +6,7 @@ import pandas as pd
 import rioxarray as rxr
 import xarray as xr
 
-from models import WaterSource
+from models import Vector, WaterSource
 
 GAUGE_POINTS_PATH = Path(r"D:\unreal\taumutu\Data\Vector\read_points_1.geojson")
 FLOOD_MODEL_OUTPUT_PATH = Path(r"D:\unreal\taumutu\Data\taumutu_100_year.nc")
@@ -19,7 +19,12 @@ def get_gauge_points() -> gpd.GeoDataFrame:
 
 
 def convert_depths_to_water_sources(gauge_depths: gpd.GeoDataFrame) -> List[WaterSource]:
-    print(gauge_depths)
+    geometry = gauge_depths.geometry
+    depth_column = gauge_depths.iloc[:, 4]  # Get column index 4 as an example of d
+    water_sources = [
+        WaterSource(location=Vector(x, y), volume=d) for x, y, d in zip(geometry.x, geometry.y, depth_column)
+    ]
+    return water_sources
 
 
 def export_to_csv(gauge_depths: gpd.GeoDataFrame, out_file_path: Path) -> None:
