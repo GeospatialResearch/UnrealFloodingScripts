@@ -9,6 +9,11 @@ import unreal
 from dataclasses import dataclass
 from typing import ClassVar, List, NamedTuple
 
+# Multiplicative adjustment factor to go from units in metres to UE Landscape scaled units (hand-calibrated)
+Z_TERRAIN_SCALE_FACTOR = 181.99
+# Additive adjustment factor to convert Z values to UE landscape units (hand-calibrated)
+Z_TERRAIN_INTERCEPT = 1913
+
 
 class Vector(NamedTuple):
     """
@@ -92,7 +97,7 @@ def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
             water_sources.append(
                 WaterSource(
                     # Add a water source in cm units, with z adjusted to match unreal level scale
-                    Vector(float(x) * 100, float(y) * 100, (float(z) * 181.99 + 1913)),
+                    Vector(float(x) * 100, float(y) * 100, (float(z) * Z_TERRAIN_SCALE_FACTOR + Z_TERRAIN_INTERCEPT)),
                     # Set volume to the depth of the water in a hand-picked time slice.
                     volume=float(zt[3]) * 100
                 )
