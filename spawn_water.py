@@ -63,8 +63,6 @@ def spawn_single_water_source(
     # Modify the water parameters
     modifier_component = source_actor.get_component_by_class(water_modifier_bp_class)
     modifier_component.set_editor_property("volume", water_source.volume)
-    mode_enum = modifier_component.get_editor_property("mode")
-    modifier_component.set_editor_property("mode", mode_enum.SET)
 
 
 def spawn_water_sources(water_sources: List[WaterSource]):
