@@ -9,12 +9,13 @@ import rioxarray as rxr
 from shapely.geometry import Point
 import xarray as xr
 
+_DATA_ROOT = Path(r"\\file\Research\FloodRiskResearch\Xander\Luke\taumutu_data")
 # Path to the file of point locations to query.
-GAUGE_POINTS_PATH = Path(r"D:\unreal\taumutu\Data\Vector\read_points_002.geojson")
+GAUGE_POINTS_PATH = _DATA_ROOT / "read_points_002.geojson"
 # Path to the Flood model output .nc file
-FLOOD_MODEL_OUTPUT_PATH = Path(r"D:\unreal\taumutu\Data\taumutu_100_year.nc")
+FLOOD_MODEL_OUTPUT_PATH = _DATA_ROOT / "taumutu_100_year.nc"
 # Path to the bounding box of the unreal level, may be smaller than the flood model output
-UNREAL_LEVEL_BOUNDS_PATH = Path(r"D:\unreal\taumutu\Data\AoI\Taumutu_SW_2k.geojson")
+UNREAL_LEVEL_BOUNDS_PATH = _DATA_ROOT / "Taumutu_SW_2k.geojson"
 # Path to the output of this script
 WATER_SOURCES_OUTPUT_PATH = Path(r"output.csv")
 # Whether points should snap to the same grid as the flood model output, or allow arbitrary floating point locations
