@@ -1,0 +1,9 @@
+name: model_to_fluid_flux2
+channels:
+  - defaults
+dependencies:
+  - geopandas
+  - h5netcdf
+  - python=3.12
+  - rioxarray
+  - xarray
