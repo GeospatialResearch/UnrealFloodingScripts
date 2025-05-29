@@ -14,18 +14,19 @@ def spawn_water_sources(water_sources: List[WaterSource]):
     EAL = unreal.EditorAssetLibrary
     ELL = unreal.EditorLevelLibrary
     blueprint_class = EAL.load_blueprint_class(asset_path=WaterSource.blueprint_class_path)
-    component_class = EAL.load_blueprint_class(asset_path="/Game/FluidFlux/Simulation/Modifiers/Components/BP_FluxModifierSourceComponent.BP_FluxModifierSourceComponent")
+    component_class = EAL.load_blueprint_class(
+        asset_path="/Game/FluidFlux/Simulation/Modifiers/Components/BP_FluxModifierSourceComponent.BP_FluxModifierSourceComponent")
     for water_source in water_sources:
         location = vector_to_unreal(water_source.location)
         rotation = (location - location).rotator()
         source_actor = ELL.spawn_actor_from_class(actor_class=blueprint_class,
-                                           location=location,
-                                           rotation=rotation)
+                                                  location=location,
+                                                  rotation=rotation)
         source_actor.set_folder_path("/FluidFlux/Sources")
         modifier_component = source_actor.get_component_by_class(component_class)
         modifier_component.set_editor_property("volume", water_source.volume)
-
-        print(water_source)
+        mode_enum = modifier_component.get_editor_property("mode")
+        modifier_component.set_editor_property("mode", mode_enum.SET)
 
 
 def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
@@ -34,13 +35,13 @@ def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
         csv_reader = csv.reader(csv_file, delimiter=",")
         next(csv_reader, None)  # Skip headers
         for x, y, *zt in csv_reader:
-            water_sources.append(WaterSource(Vector(float(x) * 100, float(y) * 100), volume=float(zt[0]) * 100))
+            water_sources.append(WaterSource(Vector(float(x) * 100, float(y) * 100), volume=float(zt[3]) * 100))
 
     return water_sources
 
 
 def main():
-    file_path = pathlib.Path(__file__).parent / "output.csv"
+    file_path = pathlib.Path(__file__).parent / "testing.csv"
     water_sources = read_water_sources_csv(file_path)
     spawn_water_sources(water_sources)
 

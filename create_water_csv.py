@@ -22,7 +22,7 @@ def get_gauge_points() -> gpd.GeoDataFrame:
 
 def convert_depths_to_water_sources(gauge_depths: gpd.GeoDataFrame) -> List[WaterSource]:
     geometry = gauge_depths.geometry
-    depth_column = gauge_depths.iloc[:, 4]  # Get column index 4 as an example of d
+    depth_column = gauge_depths.iloc[:, 3]  # Get column index 3 as an example of d
     water_sources = [
         WaterSource(location=Vector(x, y), volume=d) for x, y, d in zip(geometry.x, geometry.y, depth_column)
     ]
