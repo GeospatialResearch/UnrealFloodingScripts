@@ -91,8 +91,11 @@ def extract_depths_for_single_point(row: gpd.GeoSeries, model_output: xr.Dataset
         # Modify point to be centred on raster cell
         x = point_depth_array.xx_P0.values.item(0)
         y = point_depth_array.yy_P0.values.item(0)
-        z = point_model_output.zb_P0.values.item(0)
-        depths_for_times["geometry"] = Point(x, y, z)
+    else:
+        x = row.geometry.x
+        y = row.geometry.y
+    z = point_model_output.zb_P0.values.item(0)
+    depths_for_times["geometry"] = Point(x, y, z)
     row.update(depths_for_times)
     return row
 
