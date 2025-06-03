@@ -65,6 +65,7 @@ def spawn_single_water_source(
                                                                     rotation=rotation)
     # Move actor to specified subfolder
     source_actor.set_folder_path("/FluidFlux/Sources")
+    source_actor.set_actor_scale3d(vector_to_unreal(Vector(50, 50, 1)))
     # Modify the water parameters
     modifier_component = source_actor.get_component_by_class(water_modifier_bp_class)
     modifier_component.set_editor_property("volume", water_source.volume)
