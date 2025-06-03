@@ -12,7 +12,7 @@ from typing import ClassVar, List, NamedTuple
 # Multiplicative adjustment factor to go from units in metres to UE Landscape scaled units (hand-calibrated)
 Z_TERRAIN_SCALE_FACTOR = 181.99
 # Additive adjustment factor to convert Z values to UE landscape units (hand-calibrated)
-Z_TERRAIN_INTERCEPT = 1913
+Z_TERRAIN_INTERCEPT = 2040
 
 
 class Vector(NamedTuple):
