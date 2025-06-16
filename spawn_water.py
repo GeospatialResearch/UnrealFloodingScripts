@@ -6,7 +6,7 @@ import pathlib
 
 import unreal
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar, List, NamedTuple
 
 # Multiplicative adjustment factor to go from units in metres to UE Landscape scaled units (hand-calibrated)
@@ -34,9 +34,9 @@ class WaterSource:
     :arg blueprint_class_path: C;ass
     """
     blueprint_class_path: ClassVar[
-        str] = "/Game/FluidFlux/Simulation/Modifiers/BP_FluxModifierSourceActor.BP_FluxModifierSourceActor"
+        str] = "/Game/FFChildren/BP_FluxModifierSourceActor_Child.BP_FluxModifierSourceActor_Child"
     location: Vector = Vector(0, 0, 0)
-    volume: float = 1
+    depth_array: List[float] = field(default_factory=[0.0])
     intensity: float = 1
     direction: Vector = Vector(0, 0)
 
@@ -65,10 +65,11 @@ def spawn_single_water_source(
                                                                     rotation=rotation)
     # Move actor to specified subfolder
     source_actor.set_folder_path("/FluidFlux/Sources")
-    source_actor.set_actor_scale3d(vector_to_unreal(Vector(50, 50, 1)))
+    source_actor.set_actor_scale3d(vector_to_unreal(Vector(1, 1, 1)))
+    source_actor.set_editor_property("DepthArray", water_source.depth_array)
     # Modify the water parameters
     modifier_component = source_actor.get_component_by_class(water_modifier_bp_class)
-    modifier_component.set_editor_property("volume", water_source.volume)
+    modifier_component.set_editor_property("volume", water_source.depth_array[0])
 
 
 def spawn_water_sources(water_sources: List[WaterSource]):
@@ -99,8 +100,8 @@ def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
                 WaterSource(
                     # Add a water source in cm units, with z adjusted to match unreal level scale
                     Vector(float(x) * 100, float(y) * 100, (float(z) * Z_TERRAIN_SCALE_FACTOR + Z_TERRAIN_INTERCEPT)),
-                    # Set volume to the depth of the water in a hand-picked time slice.
-                    volume=float(zt[3]) * 100
+                    # Set water source depth array in cm
+                    depth_array=[float(depth_m) * 100 for depth_m in zt],
                 )
             )
     return water_sources
