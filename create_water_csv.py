@@ -112,6 +112,7 @@ def extract_depths_for_points(gauge_points: gpd.GeoDataFrame, model_output: xr.D
     for time_slice in time_slices:
         point_depths[str(time_slice)] = pd.Series(dtype='float32')
     point_depths = point_depths.apply(lambda point: extract_depths_for_single_point(point, model_output), axis=1)
+    point_depths.drop(["2000-01-01T00:00:00.000000000"], axis=1, inplace=True)
     return point_depths
 
 
