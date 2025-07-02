@@ -19,7 +19,7 @@ UNREAL_LEVEL_BOUNDS_PATH = _DATA_ROOT / "Taumutu_SW_2k.geojson"
 # Path to the output of this script
 WATER_SOURCES_OUTPUT_PATH = Path(r"output.csv")
 # Whether points should snap to the same grid as the flood model output, or allow arbitrary floating point locations
-LOCK_TO_GRID = True
+LOCK_TO_GRID = False
 
 
 def get_gauge_points() -> gpd.GeoDataFrame:

@@ -65,7 +65,7 @@ def spawn_single_water_source(
                                                                     rotation=rotation)
     # Move actor to specified subfolder
     source_actor.set_folder_path("/FluidFlux/Sources")
-    source_actor.set_actor_scale3d(vector_to_unreal(Vector(1, 1, 1)))
+    source_actor.set_actor_scale3d(vector_to_unreal(Vector(50, 50, 1)))
     source_actor.set_editor_property("DepthArray", water_source.depth_array)
     # Modify the water parameters
     modifier_component = source_actor.get_component_by_class(water_modifier_bp_class)
