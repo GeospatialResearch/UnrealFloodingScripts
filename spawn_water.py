@@ -70,6 +70,51 @@ def spawn_single_water_source(
     # Modify the water parameters
     modifier_component = source_actor.get_component_by_class(water_modifier_bp_class)
     modifier_component.set_editor_property("volume", water_source.depth_array[0])
+    create_depth_time_curve(source_actor, water_source.depth_array)
+
+
+def create_depth_time_csv(csv_path: pathlib.Path, depth_array):
+    with open(csv_path.as_posix(), "w") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["Time", "Depth"])
+        for index, depth in enumerate(depth_array):
+            writer.writerow([float(index), depth])
+    print(f"writ to {csv_file}")
+
+
+def create_depth_time_curve(source_actor, depth_array):
+    curve_asset_folder = pathlib.Path("/Game/Temp/Curves/")
+    curve_asset_name = f"DepthTime_{source_actor.get_actor_label()}"
+
+    temp_csv_folder = pathlib.Path(__file__).parent / "temp"
+    temp_csv_folder.mkdir(parents=True, exist_ok=True)
+    temp_csv_path = temp_csv_folder / f"{curve_asset_name}.csv"
+
+    create_depth_time_csv(temp_csv_path, depth_array)
+
+    task = unreal.AssetImportTask()
+    task.filename = temp_csv_path.as_posix()
+    task.destination_path = curve_asset_folder.as_posix()
+    task.replace_existing = True
+    task.automated = True
+    task.save = True
+
+    factory = unreal.CSVImportFactory()
+
+    # Set up import settings
+    import_settings = unreal.CSVImportSettings()
+    import_settings.import_type = unreal.CSVImportType.ECSV_CURVE_FLOAT
+    factory.automated_import_settings = import_settings
+    task.factory = factory
+
+    # Perform the import
+    asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
+    asset_tools.import_asset_tasks([task])
+    os.remove(temp_csv_path)
+
+    curve_asset = unreal.EditorAssetLibrary.load_asset((curve_asset_folder / curve_asset_name).as_posix())
+    source_actor.set_editor_property("DepthTimeCurve", curve_asset)
+
 
 
 def spawn_water_sources(water_sources: List[WaterSource]):

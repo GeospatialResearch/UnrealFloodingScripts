@@ -11,7 +11,7 @@ import xarray as xr
 
 _DATA_ROOT = Path(r"\\file\Research\FloodRiskResearch\Xander\Luke\taumutu_data")
 # Path to the file of point locations to query.
-GAUGE_POINTS_PATH = _DATA_ROOT / "read_points_002.geojson"
+GAUGE_POINTS_PATH = Path(r"D:\unreal\taumutu\Data\Vector\read_points_2.geojson")
 # Path to the Flood model output .nc file
 FLOOD_MODEL_OUTPUT_PATH = _DATA_ROOT / "taumutu_100_year.nc"
 # Path to the bounding box of the unreal level, may be smaller than the flood model output
