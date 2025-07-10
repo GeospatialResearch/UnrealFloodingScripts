@@ -11,9 +11,9 @@ from dataclasses import dataclass, field
 from typing import ClassVar, List, NamedTuple
 
 # Multiplicative adjustment factor to go from units in metres to UE Landscape scaled units (hand-calibrated)
-Z_TERRAIN_SCALE_FACTOR = 181.99
+Z_TERRAIN_SCALE_FACTOR = 1
 # Additive adjustment factor to convert Z values to UE landscape units (hand-calibrated)
-Z_TERRAIN_INTERCEPT = 2040
+Z_TERRAIN_INTERCEPT = 0
 
 
 class Vector(NamedTuple):
@@ -29,8 +29,8 @@ class Vector(NamedTuple):
 
 
 class DepthTimeEntry(NamedTuple):
-    depth: float
     timestamp: datetime
+    depth: float
 
 
 @dataclass(frozen=True)
@@ -42,7 +42,7 @@ class WaterSource:
     blueprint_class_path: ClassVar[
         str] = "/Game/FFChildren/BP_FluxModifierSourceActor_Child.BP_FluxModifierSourceActor_Child"
     location: Vector = Vector(0, 0, 0)
-    depth_array: List[DepthTimeEntry] = field(default_factory=[DepthTimeEntry(0.0, datetime.now())])
+    depth_array: List[DepthTimeEntry] = field(default_factory=[DepthTimeEntry(datetime.now(), 0.0)])
 
 
 def vector_to_unreal(vector: Vector):
@@ -76,13 +76,14 @@ def spawn_single_water_source(
     create_depth_time_curve(source_actor, water_source.depth_array)
 
 
-def create_depth_time_csv(csv_path: pathlib.Path, depth_array):
-    with open(csv_path.as_posix(), "w") as csv_file:
+def create_depth_time_csv(csv_path: pathlib.Path, depth_array: List[DepthTimeEntry]):
+    start_time = depth_array[0].timestamp
+    with open(csv_path.as_posix(), "w", newline="") as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow(["Time", "Depth"])
-        for index, (depth, _time) in enumerate(depth_array):
-            writer.writerow([float(index), depth])
-    print(f"writ to {csv_file}")
+        for timestamp, depth in depth_array:
+            seconds_since_start = (timestamp - start_time).total_seconds()
+            writer.writerow([seconds_since_start, depth])
 
 
 def create_depth_time_curve(source_actor, depth_array):
@@ -116,6 +117,8 @@ def create_depth_time_curve(source_actor, depth_array):
     os.remove(temp_csv_path)
 
     curve_asset = unreal.EditorAssetLibrary.load_asset((curve_asset_folder / curve_asset_name).as_posix())
+    imported_asset_path = (curve_asset_folder / curve_asset_name).as_posix()
+    curve_asset = unreal.EditorAssetLibrary.load_asset(imported_asset_path)
     source_actor.set_editor_property("DepthTimeCurve", curve_asset)
 
 
@@ -149,7 +152,7 @@ def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
                     # Add a water source in cm units, with z adjusted to match unreal level scale
                     Vector(float(x) * 100, float(y) * 100, (float(z) * Z_TERRAIN_SCALE_FACTOR + Z_TERRAIN_INTERCEPT)),
                     # Set water source depth array in cm
-                    depth_array=[DepthTimeEntry(float(depth_m) * 100, time_columns[i]) for i, depth_m in enumerate(zt)],
+                    depth_array=[DepthTimeEntry(time_columns[i], float(depth_m) * 100) for i, depth_m in enumerate(zt)],
                 )
             )
     return water_sources
@@ -157,7 +160,7 @@ def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
 
 def main():
     """Unreal script to spawn water sources at a location based on csv."""
-    file_path = pathlib.Path(__file__).parent / "output.csv"
+    file_path = pathlib.Path(__file__).parent / "testing.csv"
     water_sources = read_water_sources_csv(file_path)
     spawn_water_sources(water_sources)
 
