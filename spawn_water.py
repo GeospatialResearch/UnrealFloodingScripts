@@ -80,7 +80,6 @@ def create_depth_time_csv(csv_path: pathlib.Path, depth_array: List[DepthTimeEnt
     start_time = depth_array[0].timestamp
     with open(csv_path.as_posix(), "w", newline="") as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerow(["Time", "Depth"])
         for timestamp, depth in depth_array:
             seconds_since_start = (timestamp - start_time).total_seconds()
             writer.writerow([seconds_since_start, depth])
