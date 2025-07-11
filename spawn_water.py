@@ -115,19 +115,9 @@ def create_depth_time_curve(source_actor, depth_array):
     asset_tools.import_asset_tasks([task])
     os.remove(temp_csv_path)
 
+    curve_asset = unreal.EditorAssetLibrary.load_asset((curve_asset_folder / curve_asset_name).as_posix())
     imported_asset_path = (curve_asset_folder / curve_asset_name).as_posix()
     curve_asset = unreal.EditorAssetLibrary.load_asset(imported_asset_path)
-    source_actor.set_editor_property("DepthTimeCurve", curve_asset)
-
-    for x in list(dir(curve_asset)):
-        print(x)
-    # Remove unused (0,0) keyframe
-    keys = curve_asset.get_editor_property("DepthTimeCurve").get_keys()
-    first_key = keys[0]
-    if first_key.time == 0.0 and first_key.value == 0.0 and not depth_array[0].depth == 0.0:
-        curve_asset.float_curve.delete_key(0.0)
-        # Save changes
-        unreal.EditorAssetLibrary.save_asset(imported_asset_path)
     source_actor.set_editor_property("DepthTimeCurve", curve_asset)
 
 
