@@ -1,4 +1,4 @@
-name: model_to_fluid_flux2
+name: model_to_fluid_flux
 channels:
   - defaults
 dependencies:

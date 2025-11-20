@@ -13,7 +13,7 @@ from typing import ClassVar, List, NamedTuple
 # Multiplicative adjustment factor to go from units in metres to UE Landscape scaled units (hand-calibrated)
 Z_TERRAIN_SCALE_FACTOR = 1
 # Additive adjustment factor to convert Z values to UE landscape units (hand-calibrated)
-Z_TERRAIN_INTERCEPT = 0
+Z_TERRAIN_INTERCEPT = -110
 
 
 class Vector(NamedTuple):
@@ -52,7 +52,8 @@ def vector_to_unreal(vector: Vector):
 def spawn_single_water_source(
     water_source: WaterSource,
     water_source_bp_class: unreal.BlueprintGeneratedClass,
-    water_modifier_bp_class: unreal.BlueprintGeneratedClass
+    water_modifier_bp_class: unreal.BlueprintGeneratedClass,
+    time_seconds: float = 0,
 ):
     """
     Spawns a single water source into an unreal level
@@ -72,7 +73,14 @@ def spawn_single_water_source(
     source_actor.set_actor_scale3d(vector_to_unreal(Vector(1, 1, 1)))
     # Modify the water parameters
     modifier_component = source_actor.get_component_by_class(water_modifier_bp_class)
-    modifier_component.set_editor_property("volume", water_source.depth_array[0].depth)
+    time_index = 0
+    start_time = water_source.depth_array[0].timestamp
+    for i, depth_entry in enumerate(water_source.depth_array):
+        seconds_since_start = (depth_entry.timestamp - start_time).total_seconds()
+        if seconds_since_start >= time_seconds:
+            time_index = i
+            break
+    modifier_component.set_editor_property("volume", water_source.depth_array[time_index].depth)
     create_depth_time_curve(source_actor, water_source.depth_array)
 
 
@@ -130,8 +138,15 @@ def spawn_water_sources(water_sources: List[WaterSource]):
     blueprint_class = EAL.load_blueprint_class(asset_path=WaterSource.blueprint_class_path)
     component_class = EAL.load_blueprint_class(
         asset_path="/Game/FluidFlux/Simulation/Modifiers/Components/BP_FluxModifierSourceComponent.BP_FluxModifierSourceComponent")
+    selected_actors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_selected_level_actors()
+    if len(selected_actors) == 1:
+        flood_event = selected_actors[0]
+        time_seconds = flood_event.get_editor_property("LevelStartFloodTime")
+    else:
+        time_seconds = 0
     for water_source in water_sources:
-        spawn_single_water_source(water_source, blueprint_class, component_class)
+        print(f"spawning: {water_source}")
+        spawn_single_water_source(water_source, blueprint_class, component_class, time_seconds)
 
 
 def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
@@ -159,7 +174,7 @@ def read_water_sources_csv(csv_path: pathlib.Path) -> List[WaterSource]:
 
 def main():
     """Unreal script to spawn water sources at a location based on csv."""
-    file_path = pathlib.Path(__file__).parent / "testing.csv"
+    file_path = pathlib.Path(__file__).parent / "output.csv"
     water_sources = read_water_sources_csv(file_path)
     spawn_water_sources(water_sources)
 
